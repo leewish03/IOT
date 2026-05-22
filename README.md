@@ -13,10 +13,17 @@
 - YAML 정책 (`policies/`), Docker Compose (`deploy/`), 엣지 (`edge/`)
 - `backend/app/schemas/json` JSON Schema 계약
 
-## 빠른 검증
+## 빠른 검증 (MVP)
 
 ```bash
-python -m unittest discover -s backend/tests
+pip install -r requirements.txt
+python3 scripts/verify_mvp.py
+```
+
+또는:
+
+```bash
+python3 -m unittest discover -s backend/tests
 ```
 
 ## 로컬 API 서버

@@ -3,8 +3,9 @@ from __future__ import annotations
 import json
 import tempfile
 import unittest
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from backend.app.adapters.calendar import FileCalendarAdapter, NaverCalendarReadAdapter
 from backend.app.config import Settings
@@ -21,6 +22,10 @@ class OrchestratorTests(unittest.TestCase):
         (self.policy_root / "alarm_profiles").mkdir(parents=True)
         (self.policy_root / "alarm_profiles" / "normal.yaml").write_text(
             "profile_id: normal\ndescription: test profile\nsteps:\n  - notify_mobile\n",
+            encoding="utf-8",
+        )
+        (self.policy_root / "alarm_profiles" / "aggressive.yaml").write_text(
+            "profile_id: aggressive\nsteps:\n  - notify_mobile\n  - lights_on\n",
             encoding="utf-8",
         )
         self.data_dir = self.root / "data"
@@ -61,7 +66,8 @@ class OrchestratorTests(unittest.TestCase):
         self.assertEqual(logs[-1]["actor"], "scheduler")
 
     def test_calendar_tomorrow_file_adapter(self) -> None:
-        tomorrow = date.today() + timedelta(days=1)
+        tz = ZoneInfo("Asia/Seoul")
+        tomorrow = (datetime.now(tz).date() + timedelta(days=1)).isoformat()
         calendar_file = self.data_dir / "calendar_events.json"
         calendar_file.write_text(
             json.dumps(
@@ -70,7 +76,7 @@ class OrchestratorTests(unittest.TestCase):
                         {
                             "event_id": "evt-1",
                             "title": "Signals and Systems",
-                            "start": f"{tomorrow.isoformat()}T09:00:00+09:00",
+                            "start": f"{tomorrow}T09:00:00+09:00",
                             "must_wake": True,
                         }
                     ]
@@ -191,6 +197,43 @@ class OrchestratorTests(unittest.TestCase):
         registry.load()
 
         self.assertEqual(registry.validate(), [])
+
+    def test_prepare_class_day_automation(self) -> None:
+        tz = ZoneInfo("Asia/Seoul")
+        tomorrow = (datetime.now(tz).date() + timedelta(days=1)).isoformat()
+        calendar_file = self.data_dir / "calendar_events.json"
+        calendar_file.write_text(
+            json.dumps(
+                {
+                    "events": [
+                        {
+                            "event_id": "evt-class",
+                            "title": "Morning Lab",
+                            "start": f"{tomorrow}T09:30:00+09:00",
+                            "must_wake": True,
+                        }
+                    ]
+                }
+            ),
+            encoding="utf-8",
+        )
+        adapter = FileCalendarAdapter(calendar_file)
+        orchestrator = Orchestrator(self.settings, calendar_adapter=adapter)
+
+        result = orchestrator.call_tool("automation.prepare_class_day", {"profile": "aggressive"})
+
+        self.assertTrue(result["success"])
+        self.assertTrue(result["data"]["prepared"])
+        self.assertEqual(result["data"]["alarm"]["profile"], "aggressive")
+        self.assertIn("Morning Lab", result["data"]["alarm"]["label"])
+
+    def test_status_summary_tool(self) -> None:
+        orchestrator = Orchestrator(self.settings)
+        orchestrator.call_tool("relay.turn_on", {"channel": "ch1"})
+        summary = orchestrator.call_tool("system.status_summary", {})
+
+        self.assertTrue(summary["success"])
+        self.assertEqual(summary["data"]["relays"][0]["channels"]["ch1"], True)
 
 
 if __name__ == "__main__":

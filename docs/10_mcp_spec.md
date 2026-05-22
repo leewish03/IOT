@@ -19,6 +19,8 @@
 - `alarm.update_profile(alarm_id, profile)`
 - `system.explain_recent_action(time_window?)`
 - `system.execute_due_schedules(now?)`
+- `automation.prepare_class_day(profile?, offset_min?)`
+- `system.status_summary()`
 
 ## Prompts
 

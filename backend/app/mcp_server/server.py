@@ -31,6 +31,8 @@ class McpCatalogServer:
         "alarm.update_profile": "기존 알람의 강도 프로필을 변경합니다.",
         "system.explain_recent_action": "최근 Tool 실행 로그를 바탕으로 동작 이유를 설명합니다.",
         "system.execute_due_schedules": "현재 시각 기준으로 만료된 예약을 실행합니다.",
+        "automation.prepare_class_day": "내일 must_wake 일정 기준으로 수업일 알람을 준비합니다.",
+        "system.status_summary": "릴레이·알람·예약·내일 일정 요약을 반환합니다.",
     }
     PROMPTS = {
         "create-alarm": "Create an alarm with a validated time, profile, and label.",

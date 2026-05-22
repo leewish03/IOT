@@ -11,6 +11,7 @@ from ..schemas.models import ToolResult, to_jsonable
 from ..store import InMemoryStore
 from .alarm import AlarmService
 from .audit import AuditLog
+from .automation import AutomationService
 from .policies import PolicyRegistry
 from .scheduler import SchedulerService
 from .validation import ToolValidationError, validate_tool_input
@@ -47,6 +48,7 @@ class Orchestrator:
         self.scheduler = SchedulerService(self.store, self.relay)
         self.scheduler.command_executor = self._execute_scheduled_relay_command
         self.alarm = AlarmService(self.store, self.home_assistant, self.policies)
+        self.automation = AutomationService(self.calendar, self.alarm, settings.timezone)
         self.audit = AuditLog(settings.data_dir / "audit.jsonl")
 
     def read_resource(self, uri: str) -> dict[str, Any]:
@@ -143,7 +145,23 @@ class Orchestrator:
         if tool_name == "system.execute_due_schedules":
             executed = self.scheduler.execute_due(args.get("now"))
             return {"executed": [to_jsonable(job) for job in executed]}
+        if tool_name == "automation.prepare_class_day":
+            profile = str(args.get("profile", "aggressive"))
+            offset_min = int(args.get("offset_min", 30))
+            return self.automation.prepare_class_day(profile=profile, offset_min=offset_min)
+        if tool_name == "system.status_summary":
+            return self._status_summary()
         raise ValueError(f"Unknown tool: {tool_name}")
+
+    def _status_summary(self) -> dict[str, Any]:
+        next_alarm = self.alarm.next_alarm()
+        return {
+            "relays": [to_jsonable(state) for state in self.store.relays.values()],
+            "pending_schedules": len([job for job in self.store.schedules.values() if job.status == "pending"]),
+            "alarms": len(self.store.alarms),
+            "next_alarm": to_jsonable(next_alarm) if next_alarm else None,
+            "tomorrow_events": len(self.calendar.get_tomorrow(self.settings.timezone)),
+        }
 
     def _relay_set(self, args: dict[str, Any], action: str) -> dict[str, Any]:
         device_id = str(args.get("device_id") or self.settings.default_device_id)

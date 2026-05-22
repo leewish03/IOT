@@ -1,6 +1,10 @@
 # bkit runtime (local state)
 .bkit/
 
+# Python
+__pycache__/
+*.py[cod]
+
 # Node
 node_modules/
 

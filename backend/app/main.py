@@ -52,7 +52,7 @@ else:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.get("/tools")
-    def list_tools() -> list[dict[str, str]]:
+    def list_tools() -> list[dict[str, Any]]:
         return mcp_catalog.list_tools()
 
     @app.post("/tools/{tool_name}")

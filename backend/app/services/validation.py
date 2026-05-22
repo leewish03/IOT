@@ -85,6 +85,21 @@ TOOL_SCHEMAS: dict[str, dict[str, Any]] = {
         "properties": {"now": {"type": "string", "format": "date-time"}},
         "additionalProperties": False,
     },
+    "automation.prepare_class_day": {
+        "type": "object",
+        "required": [],
+        "properties": {
+            "profile": {"type": "string", "minLength": 1},
+            "offset_min": {"type": "integer"},
+        },
+        "additionalProperties": False,
+    },
+    "system.status_summary": {
+        "type": "object",
+        "required": [],
+        "properties": {},
+        "additionalProperties": False,
+    },
 }
 
 

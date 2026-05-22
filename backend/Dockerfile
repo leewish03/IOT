@@ -5,6 +5,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY backend ./backend
 COPY policies ./policies
+COPY data/calendar_events.example.json ./data/calendar_events.json
 
 ENV APP_DATA_DIR=/app/data
 ENV APP_POLICIES_DIR=/app/policies
