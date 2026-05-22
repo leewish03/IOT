@@ -6,14 +6,15 @@ from typing import Any
 from .config import Settings
 from .mcp_server import McpCatalogServer
 from .services.orchestrator import Orchestrator
-
 settings = Settings.from_env()
 settings.validate_security()
 orchestrator = Orchestrator(settings)
 mcp_catalog = McpCatalogServer(orchestrator)
+scene_service = orchestrator.scene
 
 try:
-    from fastapi import FastAPI, Header, HTTPException
+    from fastapi import FastAPI, File, Header, HTTPException, UploadFile
+    from starlette.websockets import WebSocket, WebSocketDisconnect
 except ImportError:  # pragma: no cover - deployment dependency path
     FastAPI = None  # type: ignore
     app = None
@@ -92,3 +93,46 @@ else:
             return mcp_catalog.get_prompt(name)
         except ValueError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.on_event("startup")
+    def _start_camera_stream() -> None:
+        scene_service.camera.start()
+
+    @app.on_event("shutdown")
+    def _stop_camera_stream() -> None:
+        scene_service.camera.stop()
+
+    @app.post("/scene/analyze")
+    async def analyze_scene_upload(
+        file: UploadFile = File(...),
+        authorization: str | None = Header(default=None),
+    ) -> dict[str, Any]:
+        _authorize(authorization)
+        data = await file.read()
+        if not data:
+            raise HTTPException(status_code=400, detail="Empty image upload")
+        try:
+            return scene_service.analyze_bytes(data)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @app.get("/scene/latest")
+    def scene_latest(authorization: str | None = Header(default=None)) -> dict[str, Any]:
+        _authorize(authorization)
+        latest = scene_service.get_latest()
+        if latest is None:
+            raise HTTPException(status_code=404, detail="No scene snapshot available yet")
+        return latest
+
+    @app.websocket("/ws/scene")
+    async def scene_websocket(websocket: WebSocket) -> None:
+        await websocket.accept()
+        queue = scene_service.camera.subscribe()
+        try:
+            while True:
+                payload = await queue.get()
+                await websocket.send_json(payload)
+        except WebSocketDisconnect:
+            pass
+        finally:
+            scene_service.camera.unsubscribe(queue)

@@ -21,6 +21,7 @@ class McpCatalogServer:
         {"uri": "home://automation/active", "name": "Active automations"},
         {"uri": "home://logs/recent", "name": "Recent logs"},
         {"uri": "home://sensors/environment", "name": "Temperature and humidity"},
+        {"uri": "home://scene/latest", "name": "Latest OpenCV scene snapshot"},
     ]
     TOOL_DESCRIPTIONS = {
         "relay.turn_on": "릴레이 채널을 즉시 켭니다.",
@@ -37,6 +38,8 @@ class McpCatalogServer:
         "sensor.get_environment": "온도·습도 센서 값을 조회합니다.",
         "sensor.set_environment": "모의 센서 값을 갱신합니다 (개발/테스트).",
         "ha.call_service": "Home Assistant 서비스를 호출합니다 (예: light.turn_on).",
+        "scene.get_latest": "OpenCV로 분석한 최신 장면 스냅샷(JSON)을 반환합니다.",
+        "scene.analyze": "Base64 이미지를 OpenCV로 분석해 구조화된 장면 스냅샷을 반환합니다.",
     }
     PROMPTS = {
         "create-alarm": "Create an alarm with a validated time, profile, and label.",

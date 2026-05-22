@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { MODEL_CATALOG_AS_OF, MODEL_OPTIONS, type ModelKey } from "@/lib/models";
+import { UserMenu } from "@/components/auth/user-menu";
 
 type ChatLine = { role: "user" | "assistant"; content: string };
 
@@ -144,12 +145,15 @@ export function HomeDashboard() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 p-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">집 Jarvis 대시보드</h1>
-        <p className="text-muted-foreground text-sm">
-          Phase 0·3·4·5 — 수동 제어, 채팅, 음성(4초), 비전. 오케스트레이터:{" "}
-          <Badge variant={health === "online" ? "default" : "destructive"}>{health}</Badge>
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-semibold tracking-tight">집 Jarvis 대시보드</h1>
+          <p className="text-muted-foreground text-sm">
+            Phase 0·3·4·5 — 수동 제어, 채팅, 음성(4초), 비전. 오케스트레이터:{" "}
+            <Badge variant={health === "online" ? "default" : "destructive"}>{health}</Badge>
+          </p>
+        </div>
+        <UserMenu />
       </div>
 
       {error && (

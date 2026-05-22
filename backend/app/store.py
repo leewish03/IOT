@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from .schemas.models import Alarm, EnvironmentSnapshot, RelayState, ScheduleJob
+from .schemas.models import Alarm, EnvironmentSnapshot, RelayState, SceneSnapshot, ScheduleJob
 
 
 @dataclass
@@ -14,6 +14,7 @@ class InMemoryStore:
     environment: EnvironmentSnapshot = field(
         default_factory=lambda: EnvironmentSnapshot(temperature_c=22.5, humidity_pct=48.0)
     )
+    latest_scene: SceneSnapshot | None = None
 
     def __post_init__(self) -> None:
         if self.default_device_id not in self.relays:

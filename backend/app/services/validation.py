@@ -124,6 +124,20 @@ TOOL_SCHEMAS: dict[str, dict[str, Any]] = {
         },
         "additionalProperties": False,
     },
+    "scene.get_latest": {
+        "type": "object",
+        "required": [],
+        "properties": {},
+        "additionalProperties": False,
+    },
+    "scene.analyze": {
+        "type": "object",
+        "required": ["image_base64"],
+        "properties": {
+            "image_base64": {"type": "string", "minLength": 1},
+        },
+        "additionalProperties": False,
+    },
 }
 
 

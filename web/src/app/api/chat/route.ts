@@ -1,10 +1,28 @@
 import { NextResponse } from "next/server";
 import { runAgentChat } from "@/lib/agent";
 import type { ModelKey } from "@/lib/models";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
   try {
+    const hasSupabase =
+      Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+      Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+    let supabase: Awaited<ReturnType<typeof createClient>> | null = null;
+    let userId: string | null = null;
+
+    if (hasSupabase) {
+      supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      userId = user.id;
+    }
+
     const body = await request.json();
     const message = String(body.message ?? "").trim();
     const modelKey = (body.model ?? "claude-haiku-4.6") as ModelKey;
@@ -31,11 +49,21 @@ export async function POST(request: Request) {
 
     const result = await runAgentChat({ modelKey, messages });
 
-    const supabase = createServiceClient();
-    if (supabase) {
+    if (supabase && userId) {
       await supabase.from("chat_messages").insert([
-        { role: "user", content: message, model_key: modelKey },
-        { role: "assistant", content: result.reply, model_key: modelKey, tool_calls: result.toolCalls },
+        {
+          role: "user",
+          content: message,
+          model_key: modelKey,
+          user_id: userId,
+        },
+        {
+          role: "assistant",
+          content: result.reply,
+          model_key: modelKey,
+          tool_calls: result.toolCalls,
+          user_id: userId,
+        },
       ]);
     }
 

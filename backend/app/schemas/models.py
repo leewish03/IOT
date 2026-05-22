@@ -88,6 +88,26 @@ class EnvironmentSnapshot:
 
 
 @dataclass
+class PersonSceneInfo:
+    bbox: list[int]
+    centroid: dict[str, float]
+    posture: str
+    activity: str
+    zone: str
+
+
+@dataclass
+class SceneSnapshot:
+    person_count: int
+    persons: list[PersonSceneInfo]
+    motion: str
+    summary_ko: str
+    analyzed_at: str = field(default_factory=utcnow_iso)
+    frame_width: int = 0
+    frame_height: int = 0
+
+
+@dataclass
 class ToolResult:
     success: bool
     data: dict[str, Any] = field(default_factory=dict)

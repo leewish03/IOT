@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 from typing import Any
 
 from ..adapters.calendar import CalendarAdapter, FileCalendarAdapter, NaverCalendarReadAdapter
@@ -14,6 +15,7 @@ from .audit import AuditLog
 from .automation import AutomationService
 from .policies import PolicyRegistry
 from .scheduler import SchedulerService
+from .scene import SceneService
 from .sensors import SensorService
 from .validation import ToolValidationError, validate_tool_input
 
@@ -51,6 +53,7 @@ class Orchestrator:
         self.alarm = AlarmService(self.store, self.home_assistant, self.policies)
         self.automation = AutomationService(self.calendar, self.alarm, settings.timezone)
         self.sensors = SensorService(self.store)
+        self.scene = SceneService(self.store)
         self.audit = AuditLog(settings.data_dir / "audit.jsonl")
 
     def read_resource(self, uri: str) -> dict[str, Any]:
@@ -66,6 +69,9 @@ class Orchestrator:
             return {"events": self.audit.recent()}
         if uri == "home://sensors/environment":
             return {"environment": to_jsonable(self.sensors.read_environment())}
+        if uri == "home://scene/latest":
+            latest = self.scene.get_latest()
+            return {"scene": latest}
         raise ValueError(f"Unknown resource URI: {uri}")
 
     def call_tool(
@@ -168,6 +174,14 @@ class Orchestrator:
             payload = dict(args.get("data") or {})
             result = self.home_assistant.call_service(service, payload)
             return {"ha": result}
+        if tool_name == "scene.get_latest":
+            latest = self.scene.get_latest()
+            if latest is None:
+                return {"scene": None, "message": "No scene snapshot available yet."}
+            return {"scene": latest}
+        if tool_name == "scene.analyze":
+            snapshot = self.scene.analyze_bytes(base64.b64decode(str(args["image_base64"]), validate=True))
+            return {"scene": snapshot}
         raise ValueError(f"Unknown tool: {tool_name}")
 
     def _status_summary(self) -> dict[str, Any]:
