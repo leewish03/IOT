@@ -1,0 +1,19 @@
+[Unit]
+Description=IoT web dashboard container (ensure running after orchestrator)
+Documentation=file:///opt/iot-home/docs/06-guide/pi-deploy.md
+PartOf=iot-stack.target
+After=iot-orchestrator.service
+Requires=iot-orchestrator.service
+BindsTo=iot-docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/iot-home/deploy/docker-compose
+Environment=COMPOSE_PROJECT_NAME=iot-home
+ExecStart=/usr/bin/docker compose up -d web
+ExecStop=/usr/bin/docker compose stop web
+TimeoutStartSec=600
+
+[Install]
+WantedBy=iot-stack.target

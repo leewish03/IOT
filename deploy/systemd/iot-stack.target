@@ -1,0 +1,10 @@
+[Unit]
+Description=IoT home stack (Docker Compose: MQTT, orchestrator, web)
+Documentation=file:///opt/iot-home/docs/06-guide/pi-deploy.md
+After=docker.service network-online.target
+Wants=network-online.target
+Requires=docker.service
+Wants=iot-docker.service iot-orchestrator.service iot-web.service
+
+[Install]
+WantedBy=multi-user.target
