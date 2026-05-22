@@ -80,6 +80,14 @@ class AuditEvent:
 
 
 @dataclass
+class EnvironmentSnapshot:
+    temperature_c: float
+    humidity_pct: float
+    updated_at: str = field(default_factory=utcnow_iso)
+    source: str = "mock"
+
+
+@dataclass
 class ToolResult:
     success: bool
     data: dict[str, Any] = field(default_factory=dict)

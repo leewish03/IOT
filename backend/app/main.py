@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import Any
 
 from .config import Settings
@@ -18,6 +19,20 @@ except ImportError:  # pragma: no cover - deployment dependency path
     app = None
 else:
     app = FastAPI(title="MCP IoT Home Orchestrator", version="0.1.0")
+
+    try:
+        from fastapi.middleware.cors import CORSMiddleware
+
+        origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=[o.strip() for o in origins if o.strip()],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+    except ImportError:
+        pass
 
     def _authorize(authorization: str | None) -> None:
         expected = f"Bearer {settings.backend_api_token}"

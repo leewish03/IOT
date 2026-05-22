@@ -227,6 +227,19 @@ class OrchestratorTests(unittest.TestCase):
         self.assertEqual(result["data"]["alarm"]["profile"], "aggressive")
         self.assertIn("Morning Lab", result["data"]["alarm"]["label"])
 
+    def test_sensor_and_ha_tools(self) -> None:
+        orchestrator = Orchestrator(self.settings)
+        env = orchestrator.call_tool("sensor.get_environment", {})
+        self.assertTrue(env["success"])
+        self.assertIn("temperature_c", env["data"]["environment"])
+
+        ha = orchestrator.call_tool(
+            "ha.call_service",
+            {"service": "light.turn_on", "data": {"entity_id": "light.living_room"}},
+        )
+        self.assertTrue(ha["success"])
+        self.assertTrue(ha["data"]["ha"]["dry_run"])
+
     def test_status_summary_tool(self) -> None:
         orchestrator = Orchestrator(self.settings)
         orchestrator.call_tool("relay.turn_on", {"channel": "ch1"})

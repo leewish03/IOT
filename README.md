@@ -168,10 +168,26 @@ curl -X POST http://127.0.0.1:8080/tools/relay.turn_on \
 
 ---
 
+## Jarvis 대시보드 (Phase 0·3·4·5)
+
+| 경로 | 내용 |
+|------|------|
+| `web/` | shadcn 대시보드 — 수동 제어, 채팅, 음성, 비전 |
+| `supabase/migrations/` | 채팅·설정 DB (선택) |
+| `render.yaml` | Render 배포 (orchestrator + dashboard + workflows) |
+
+```bash
+python3 -m uvicorn backend.app.main:app --port 8080   # 터미널 1
+cp web/.env.example web/.env.local   # API 키
+cd web && npm run dev                # 터미널 2 → http://localhost:3000
+```
+
+가이드: [docs/04-report/features/jarvis-phases-0-3-4-5.report.md](docs/04-report/features/jarvis-phases-0-3-4-5.report.md)
+
 ## 문의·다음 단계
 
 1. `deploy/env/backend.env` 에 토큰·Home Assistant 주소 넣기  
 2. 실제 릴레이·MQTT 연결 (`edge/`)  
-3. Open WebUI에서 이 서버 URL 연결 (`webui/`)
+3. `web/.env.local` 에 Anthropic/OpenAI 키 — 채팅·음성·비전 API
 
 기능 추가·버그 수정은 Cursor에서 이 README와 `docs/` 를 함께 보면 됩니다.

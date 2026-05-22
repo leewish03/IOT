@@ -14,6 +14,7 @@ from .audit import AuditLog
 from .automation import AutomationService
 from .policies import PolicyRegistry
 from .scheduler import SchedulerService
+from .sensors import SensorService
 from .validation import ToolValidationError, validate_tool_input
 
 
@@ -49,6 +50,7 @@ class Orchestrator:
         self.scheduler.command_executor = self._execute_scheduled_relay_command
         self.alarm = AlarmService(self.store, self.home_assistant, self.policies)
         self.automation = AutomationService(self.calendar, self.alarm, settings.timezone)
+        self.sensors = SensorService(self.store)
         self.audit = AuditLog(settings.data_dir / "audit.jsonl")
 
     def read_resource(self, uri: str) -> dict[str, Any]:
@@ -62,6 +64,8 @@ class Orchestrator:
             return {"schedules": [to_jsonable(job) for job in self.store.schedules.values() if job.status == "pending"]}
         if uri == "home://logs/recent":
             return {"events": self.audit.recent()}
+        if uri == "home://sensors/environment":
+            return {"environment": to_jsonable(self.sensors.read_environment())}
         raise ValueError(f"Unknown resource URI: {uri}")
 
     def call_tool(
@@ -151,6 +155,19 @@ class Orchestrator:
             return self.automation.prepare_class_day(profile=profile, offset_min=offset_min)
         if tool_name == "system.status_summary":
             return self._status_summary()
+        if tool_name == "sensor.get_environment":
+            return {"environment": to_jsonable(self.sensors.read_environment())}
+        if tool_name == "sensor.set_environment":
+            env = self.sensors.update_environment(
+                temperature_c=args.get("temperature_c"),
+                humidity_pct=args.get("humidity_pct"),
+            )
+            return {"environment": to_jsonable(env)}
+        if tool_name == "ha.call_service":
+            service = str(args["service"])
+            payload = dict(args.get("data") or {})
+            result = self.home_assistant.call_service(service, payload)
+            return {"ha": result}
         raise ValueError(f"Unknown tool: {tool_name}")
 
     def _status_summary(self) -> dict[str, Any]:
@@ -161,6 +178,7 @@ class Orchestrator:
             "alarms": len(self.store.alarms),
             "next_alarm": to_jsonable(next_alarm) if next_alarm else None,
             "tomorrow_events": len(self.calendar.get_tomorrow(self.settings.timezone)),
+            "environment": to_jsonable(self.sensors.read_environment()),
         }
 
     def _relay_set(self, args: dict[str, Any], action: str) -> dict[str, Any]:

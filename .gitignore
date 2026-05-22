@@ -1,6 +1,14 @@
 # bkit runtime (local state)
 .bkit/
 
+# Runtime data
+data/audit.jsonl
+
+# Web
+web/node_modules/
+web/.next/
+web/.env.local
+
 # Python
 __pycache__/
 *.py[cod]

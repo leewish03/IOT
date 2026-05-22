@@ -100,6 +100,30 @@ TOOL_SCHEMAS: dict[str, dict[str, Any]] = {
         "properties": {},
         "additionalProperties": False,
     },
+    "sensor.get_environment": {
+        "type": "object",
+        "required": [],
+        "properties": {},
+        "additionalProperties": False,
+    },
+    "sensor.set_environment": {
+        "type": "object",
+        "required": [],
+        "properties": {
+            "temperature_c": {"type": "number"},
+            "humidity_pct": {"type": "number"},
+        },
+        "additionalProperties": False,
+    },
+    "ha.call_service": {
+        "type": "object",
+        "required": ["service"],
+        "properties": {
+            "service": {"type": "string", "minLength": 3},
+            "data": {"type": "object"},
+        },
+        "additionalProperties": False,
+    },
 }
 
 
@@ -155,4 +179,6 @@ def _matches_type(value: Any, expected_type: Any) -> bool:
         return isinstance(value, bool)
     if expected_type == "integer":
         return isinstance(value, int) and not isinstance(value, bool)
+    if expected_type == "number":
+        return isinstance(value, (int, float)) and not isinstance(value, bool)
     return True

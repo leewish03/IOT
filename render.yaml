@@ -1,0 +1,43 @@
+# Render Blueprint — Jarvis IoT stack
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: iot-orchestrator
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    plan: starter
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: CORS_ORIGINS
+        value: https://iot-dashboard.onrender.com
+      - key: BACKEND_API_TOKEN
+        generateValue: true
+
+  - type: web
+    name: iot-dashboard
+    runtime: node
+    rootDir: web
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    plan: starter
+    envVars:
+      - key: ORCHESTRATOR_URL
+        fromService:
+          name: iot-orchestrator
+          type: web
+          property: hostport
+      - key: ORCHESTRATOR_TOKEN
+        fromService:
+          name: iot-orchestrator
+          envVarKey: BACKEND_API_TOKEN
+
+  - type: workflow
+    name: iot-workflows
+    runtime: python
+    rootDir: workflows
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    plan: starter
