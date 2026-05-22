@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { MODEL_CATALOG_AS_OF, MODEL_OPTIONS, type ModelKey } from "@/lib/models";
+import type { SceneSnapshot } from "@/lib/scene-types";
 import { UserMenu } from "@/components/auth/user-menu";
 
 type ChatLine = { role: "user" | "assistant"; content: string };
@@ -36,7 +37,11 @@ export function HomeDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [autoVision, setAutoVision] = useState(false);
   const [visionResult, setVisionResult] = useState<string>("");
+  const [liveScene, setLiveScene] = useState<SceneSnapshot | null>(null);
+  const [liveStreamOn, setLiveStreamOn] = useState(false);
+  const [sceneRaw, setSceneRaw] = useState<string>("");
   const mediaRef = useRef<MediaRecorder | null>(null);
+  const eventSourceRef = useRef<EventSource | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
   const refreshStatus = useCallback(async () => {
@@ -54,6 +59,31 @@ export function HomeDashboard() {
   useEffect(() => {
     refreshStatus();
   }, [refreshStatus]);
+
+  useEffect(() => {
+    if (!liveStreamOn) {
+      eventSourceRef.current?.close();
+      eventSourceRef.current = null;
+      return;
+    }
+    const es = new EventSource("/api/scene/stream?interval=1000");
+    eventSourceRef.current = es;
+    es.addEventListener("scene", (ev) => {
+      try {
+        const payload = JSON.parse(ev.data) as { scene: SceneSnapshot | null };
+        if (payload.scene) {
+          setLiveScene(payload.scene);
+          setSceneRaw(JSON.stringify(payload.scene, null, 2));
+        }
+      } catch {
+        /* ignore parse errors */
+      }
+    });
+    es.addEventListener("error", () => {
+      setError("실시간 장면 스트림 연결 실패 (Pi 카메라 또는 오케스트레이터 확인)");
+    });
+    return () => es.close();
+  }, [liveStreamOn]);
 
   const sendChat = async () => {
     if (!input.trim()) return;
@@ -132,10 +162,38 @@ export function HomeDashboard() {
       const res = await fetch("/api/vision", { method: "POST", body: form });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "vision failed");
-      setVisionResult(data.analysis + (data.reply ? `\n\n${data.reply}` : ""));
+      if (data.scene) setSceneRaw(JSON.stringify(data.scene, null, 2));
+      const sceneLine = data.scene?.summary_ko ? `\n\n[OpenCV] ${data.scene.summary_ko}` : "";
+      setVisionResult(
+        (data.analysis ?? "") + sceneLine + (data.reply ? `\n\n[AI 실행] ${data.reply}` : ""),
+      );
       await refreshStatus();
     } catch (e) {
       setError(e instanceof Error ? e.message : "vision error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const judgeLiveScene = async () => {
+    setLoading(true);
+    setError(null);
+    const form = new FormData();
+    form.append("live", "true");
+    form.append("model", model);
+    form.append("autoAct", String(autoVision));
+    try {
+      const res = await fetch("/api/vision", { method: "POST", body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "live vision failed");
+      if (data.scene) setSceneRaw(JSON.stringify(data.scene, null, 2));
+      setVisionResult(
+        (data.analysis ?? "") +
+          (data.scene?.summary_ko ? `\n\n[OpenCV] ${data.scene.summary_ko}` : "") +
+          (data.reply ? `\n\n[AI 실행] ${data.reply}` : ""),
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "live vision error");
     } finally {
       setLoading(false);
     }
@@ -192,6 +250,7 @@ export function HomeDashboard() {
         <TabsList>
           <TabsTrigger value="control">수동 제어</TabsTrigger>
           <TabsTrigger value="chat">채팅 (Phase 3)</TabsTrigger>
+          <TabsTrigger value="realtime">실시간 장면</TabsTrigger>
           <TabsTrigger value="vision">비전 (Phase 4)</TabsTrigger>
         </TabsList>
 
@@ -280,11 +339,40 @@ export function HomeDashboard() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="realtime" className="flex flex-col gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>실시간 장면 (OpenCV)</CardTitle>
+              <CardDescription>
+                Pi 카메라 → OpenCV(사람·자세·이동·구역) → 메타만 AI 판단. 원본 영상은 LLM에 전송하지 않습니다.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <Switch checked={liveStreamOn} onCheckedChange={setLiveStreamOn} id="live-scene" />
+                <Label htmlFor="live-scene">장면 스트림 (1초 폴링)</Label>
+                <Button type="button" variant="secondary" onClick={judgeLiveScene} disabled={loading}>
+                  최신 장면 AI 판단
+                </Button>
+              </div>
+              {liveScene && (
+                <p className="text-sm">
+                  사람 {liveScene.person_count}명 · {liveScene.motion === "moving" ? "움직임" : "정적"} ·{" "}
+                  {liveScene.summary_ko}
+                </p>
+              )}
+              {sceneRaw && <Textarea readOnly value={sceneRaw} rows={10} className="font-mono text-xs" />}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="vision">
           <Card>
             <CardHeader>
               <CardTitle>비전 분석</CardTitle>
-              <CardDescription>사진 업로드 → 상황 판단 → (선택) 도구 실행</CardDescription>
+              <CardDescription>
+                사진 → OpenCV 메타 추출 → AI 상황 판단 → (선택) IoT 도구 실행
+              </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               <Input type="file" accept="image/*" onChange={(e) => onVisionFile(e.target.files?.[0] ?? null)} />

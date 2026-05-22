@@ -33,6 +33,9 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/auth") || pathname.startsWith("/api/auth");
 
   if (!user && !isAuthRoute) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/auth/login";
     loginUrl.searchParams.set("next", pathname);

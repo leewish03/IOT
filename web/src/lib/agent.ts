@@ -115,56 +115,47 @@ export async function runAgentChat(params: {
   return { reply: "도구 호출 한도에 도달했습니다.", toolCalls };
 }
 
-export async function analyzeVision(params: {
+/** AI judges home situation from OpenCV metadata only (no camera pixels to LLM). */
+export async function judgeSceneFromMetadata(params: {
   modelKey: ModelKey;
-  imageBase64: string;
-  mimeType: string;
+  scene: Record<string, unknown>;
   prompt?: string;
 }): Promise<{ analysis: string; suggestedActions: string[]; toolCalls: { name: string; result: unknown }[] }> {
+  const sceneJson = JSON.stringify(params.scene, null, 2);
   const userText =
     params.prompt ??
-    "Describe the room scene. Recommend IoT actions (lights, AC, alarm) in Korean. If obvious, list tool names to call.";
+    `다음은 OpenCV로 추출한 실시간 장면 메타데이터입니다(원본 영상 없음).
+사람 위치·자세·활동·이동 여부·구역을 바탕으로 집 IoT 조치를 한국어로 짧게 제안하세요.
+필요하면 relay, alarm, ha, sensor 도구를 호출하라고 안내하세요.
 
-  const visionModel = resolveModel(params.modelKey).visionApiModel;
+장면 JSON:
+${sceneJson}`;
 
-  if (params.modelKey === "gpt-5.4-nano") {
+  const model = resolveModel(params.modelKey);
+
+  if (model.provider === "openai") {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const completion = await openai.chat.completions.create({
-      model: visionModel,
+      model: model.apiModel,
       messages: [
-        {
-          role: "user",
-          content: [
-            { type: "text", text: userText },
-            {
-              type: "image_url",
-              image_url: { url: `data:${params.mimeType};base64,${params.imageBase64}` },
-            },
-          ],
-        },
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: userText },
       ],
     });
     const analysis = completion.choices[0].message.content ?? "";
     return { analysis, suggestedActions: [], toolCalls: [] };
   }
 
-  // May 2026: multimodal vision via GPT-5.4 nano (Haiku chat may be text-only on API).
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const completion = await openai.chat.completions.create({
-    model: visionModel,
-    messages: [
-      {
-        role: "user",
-        content: [
-          { type: "text", text: userText },
-          {
-            type: "image_url",
-            image_url: { url: `data:${params.mimeType};base64,${params.imageBase64}` },
-          },
-        ],
-      },
-    ],
+  const response = await anthropicMessagesCreate({
+    model: model.apiModel,
+    fallbackModel: model.fallbackApiModel,
+    system: SYSTEM_PROMPT,
+    tools: [],
+    messages: [{ role: "user", content: userText }],
   });
-  const analysis = completion.choices[0].message.content ?? "";
-  return { analysis, suggestedActions: [], toolCalls: [] };
+  const text = response.content
+    .filter((b) => b.type === "text")
+    .map((b) => (b.type === "text" ? b.text : ""))
+    .join("");
+  return { analysis: text, suggestedActions: [], toolCalls: [] };
 }

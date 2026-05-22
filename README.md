@@ -168,21 +168,39 @@ curl -X POST http://127.0.0.1:8080/tools/relay.turn_on \
 
 ---
 
-## Jarvis 대시보드 (Phase 0·3·4·5)
+## Jarvis 대시보드 (전체 스택)
 
 | 경로 | 내용 |
 |------|------|
-| `web/` | shadcn 대시보드 — 수동 제어, 채팅, 음성, 비전 |
-| `supabase/migrations/` | 채팅·설정 DB (선택) |
-| `render.yaml` | Render 배포 (orchestrator + dashboard + workflows) |
+| `web/` | shadcn — 수동·채팅·음성·**OpenCV 장면**·AI 판단 |
+| `supabase/migrations/` | Auth, chat, vision, scene_events |
+| `deploy/` | Pi **한 방에** Docker + systemd |
+| `render.yaml` | Render (orchestrator + dashboard + workflows) |
+
+**비전:** 카메라 영상은 **OpenCV**로만 분석(사람 위치·자세·이동). **LLM에는 JSON 메타만** 전달합니다.
 
 ```bash
-python3 -m uvicorn backend.app.main:app --port 8080   # 터미널 1
-cp web/.env.example web/.env.local   # API 키
-cd web && npm run dev                # 터미널 2 → http://localhost:3000
+# Pi / 로컬
+git pull
+cp deploy/env/backend.env.example deploy/env/backend.env
+cp deploy/env/web.env.example deploy/env/web.env
+cp web/.env.example web/.env.local   # Supabase + API 키
+sudo bash scripts/pi-install.sh    # 또는 deploy/docker-compose
 ```
 
-가이드: [docs/04-report/features/jarvis-phases-0-3-4-5.report.md](docs/04-report/features/jarvis-phases-0-3-4-5.report.md) · Render+Supabase: [docs/06-guide/deploy-render-supabase.md](docs/06-guide/deploy-render-supabase.md)
+| 가이드 | 링크 |
+|--------|------|
+| Pi 한 방 배포 | [docs/06-guide/pi-deploy.md](docs/06-guide/pi-deploy.md) |
+| Render + Supabase | [docs/06-guide/deploy-render-supabase.md](docs/06-guide/deploy-render-supabase.md) |
+| Phase 보고 | [docs/04-report/features/jarvis-phases-0-3-4-5.report.md](docs/04-report/features/jarvis-phases-0-3-4-5.report.md) |
+
+로컬 개발:
+
+```bash
+python3 -m uvicorn backend.app.main:app --port 8080
+cd web && npm run dev   # http://localhost:3000
+python3 scripts/verify_jarvis.py
+```
 
 ## 문의·다음 단계
 

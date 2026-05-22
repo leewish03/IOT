@@ -22,6 +22,8 @@ services:
         value: https://iot-dashboard.onrender.com
       - key: BACKEND_API_TOKEN
         generateValue: true
+      - key: SCENE_FPS_LIMIT
+        value: "1.0"
 
   - type: web
     name: iot-dashboard

@@ -51,3 +51,31 @@ export async function healthCheck() {
   const res = await fetch(`${baseUrl}/health`, { cache: "no-store" });
   return res.json();
 }
+
+export async function analyzeSceneImage(file: Blob): Promise<Record<string, unknown>> {
+  const form = new FormData();
+  form.append("file", file);
+  const h: HeadersInit = {};
+  if (token && token !== "change-me") {
+    h.Authorization = `Bearer ${token}`;
+  }
+  const res = await fetch(`${baseUrl}/scene/analyze`, {
+    method: "POST",
+    headers: h,
+    body: form,
+  });
+  const body = await res.json();
+  if (!res.ok) {
+    throw new Error((body as { detail?: string }).detail ?? `scene analyze ${res.status}`);
+  }
+  return body;
+}
+
+export async function getSceneLatest(): Promise<Record<string, unknown> | null> {
+  const res = await fetch(`${baseUrl}/scene/latest`, { headers: headers(), cache: "no-store" });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new Error(`scene latest ${res.status}`);
+  }
+  return res.json();
+}

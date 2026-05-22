@@ -39,7 +39,7 @@ export async function anthropicMessagesCreate(params: {
         model,
         max_tokens: params.max_tokens ?? 1024,
         system: params.system,
-        tools: params.tools,
+        ...(params.tools.length > 0 ? { tools: params.tools } : {}),
         messages: params.messages,
       }),
     });
