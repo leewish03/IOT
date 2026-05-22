@@ -42,3 +42,36 @@ FastAPI가 설치되어 있지 않아도 핵심 오케스트레이터 모듈과 
 - Mock 캘린더 예시: `./data/calendar_events.example.json`
 - 알람 출력 대상: Home Assistant script/service 추상화
 - Naver Calendar: 읽기 연동 가능성 검토 대상으로 두며, MVP 읽기 fallback은 Google/file 어댑터입니다.
+
+# IOT
+
+IoT application workspace with **bkit** (AI Native Development OS) integrated for Cursor.
+
+## bkit quick start
+
+1. Run setup once:
+
+```bash
+./scripts/setup-bkit-cursor.sh
+```
+
+2. In Cursor chat (Korean or English), for example:
+
+- `pdca pm my-feature` — PM 분석 후 PDCA 사이클
+- `sprint master-plan release --features a,b,c` — 스프린트 마스터 플랜
+- `bkit help` — 전체 스킬·에이전트 목록
+
+3. Read the guide: [docs/06-guide/bkit-cursor.guide.md](docs/06-guide/bkit-cursor.guide.md)
+
+## Layout
+
+| Path | Purpose |
+|------|---------|
+| `bkit/` | Upstream toolkit (skills, agents, lib, MCP servers) |
+| `.cursor/rules/bkit.mdc` | Always-on workflow rules |
+| `.cursor/skills/` | Symlinks to `bkit/skills/*` (after setup) |
+| `.cursor/mcp.json` | bkit-pdca + bkit-analysis MCP |
+| `AGENTS.md` | Subagent index for Task tool |
+| `docs/` | PDCA artifacts (Korean) |
+
+Upstream: https://github.com/popup-studio-ai/bkit-claude-code

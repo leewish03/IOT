@@ -1,0 +1,14 @@
+# bkit runtime (local state)
+.bkit/
+
+# Node
+node_modules/
+
+# Environment
+.env
+.env.local
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
