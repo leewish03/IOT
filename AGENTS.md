@@ -1,5 +1,18 @@
 # Agents — bkit on Cursor
 
+## Cloud Agent / default mandate
+
+**Always use bkit proactively.** The user will not repeat "use bkit" each time.
+
+- Start from `bkit/skills/pdca/SKILL.md` or `sprint/SKILL.md` based on task scope.
+- Spawn parallel **Task** subagents by default for non-trivial work (do not wait for `/pdca team`).
+- Enforce quality gates; use MCP `bkit-pdca` / `bkit-analysis` when status or metrics are needed.
+- Opt-out only if the user explicitly asks to skip bkit or docs.
+
+Project rules: `.cursor/rules/bkit.mdc` (`alwaysApply: true`).
+
+---
+
 Specialist personas live in `bkit/agents/`. In Cursor, spawn them with the **Task** tool (`subagent_type`: `generalPurpose` or `explore`) and paste the relevant agent file as the system prompt basis.
 
 ## Core orchestration

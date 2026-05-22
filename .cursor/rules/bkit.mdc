@@ -1,11 +1,24 @@
 ---
-description: bkit AI Native Development OS — PDCA, Sprint, quality gates, and skill routing for Cursor
+description: bkit AI Native Development OS — ALWAYS use proactively; PDCA, Sprint, parallel agents, quality gates
 alwaysApply: true
 ---
 
-# bkit on Cursor
+# bkit on Cursor — mandatory default
 
-This project includes **bkit** (vendored under `bkit/`). Use it as the primary development workflow kit.
+**The user does NOT need to say "use bkit".** For every coding task in this repo, you MUST proactively run the bkit workflow unless the user explicitly opts out (e.g. "bkit 없이", "quick fix only", "skip docs").
+
+## Default behavior (every session, every task)
+
+1. **Before coding** — Infer feature name; check `docs/` and MCP `bkit-pdca` for existing PDCA state. If none, start at plan or read `bkit/skills/pdca/SKILL.md` for the right phase.
+2. **While coding** — Align with `docs/02-design/` if a design exists; apply `bkit/skills/phase-*` or `development-pipeline` when the task matches a phase.
+3. **After meaningful code changes** — Proactively run gap-style verification: read `bkit/skills/pdca/SKILL.md` analyze/iterate sections or spawn **Task** with `bkit/agents/gap-detector.md`. Do not skip quality gates (M1/M3/S1).
+4. **Non-trivial features** — Prefer parallel **Task** subagents (2–4 at once) using `bkit/agents/*.md` (e.g. security + frontend + QA) without waiting for the user to ask for "team mode".
+5. **Multi-feature or release work** — Use `bkit/skills/sprint/SKILL.md` (master-plan / start) without being asked.
+6. **Document** — Write or update Korean docs under `docs/01-plan`, `02-design`, `03-analysis`, `04-report` as phases complete.
+
+If unsure which skill applies, read `bkit/skills/bkit/SKILL.md` first, then the specific skill.
+
+This project includes **bkit** (vendored under `bkit/`). It is the **only** approved development process for this repo—not an optional add-on.
 
 ## Language
 

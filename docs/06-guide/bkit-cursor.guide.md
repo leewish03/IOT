@@ -2,6 +2,18 @@
 
 이 저장소는 [bkit-claude-code](https://github.com/popup-studio-ai/bkit-claude-code)를 `bkit/` 아래에 포함하고, Cursor Cloud Agent / IDE에서 동일한 워크플로를 쓸 수 있게 맞춰 두었습니다.
 
+## "매번 bkit 써줘" 말 안 해도 되게 — 프롬프트 저장 위치
+
+| 저장 위치 | 용도 | 이 프로젝트 |
+|-----------|------|-------------|
+| **`.cursor/rules/*.mdc`** + `alwaysApply: true` | 이 repo를 열 때 **항상** 적용되는 프로젝트 규칙 | ✅ `.cursor/rules/bkit.mdc` (적극 활용·병렬 Task·게이트 강제) |
+| **`AGENTS.md`** (repo 루트) | Cloud Agent / Agent 모드 기본 지시 | ✅ 루트 `AGENTS.md` |
+| **Cursor Settings → Rules** | 모든 프로젝트 공통 **사용자 규칙** | 선택: "IOT repo uses bkit" 한 줄만 넣어도 됨 |
+| **`.cursor/skills/`** | 스킬 정의 (호출 가능한 워크플로) | ✅ `bkit/skills` 링크 44개 |
+| ~~채팅에 매번 붙이기~~ | 비추천 | 규칙 파일로 대체함 |
+
+**플러그인/마켓플레이스 설치가 아님** — 위 파일들이 "항상 켜진 프롬프트" 역할을 합니다.
+
 ## 한 번만 설정
 
 ```bash
