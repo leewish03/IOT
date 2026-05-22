@@ -1,0 +1,24 @@
+# Workflow Skill Template
+# Classification: workflow (process automation, model-independent)
+# Deprecation Risk: none
+name: "{name}"
+classification: workflow
+classification-reason: "Process automation independent of model capability evolution"
+deprecation-risk: none
+description: |
+  {description}
+argument-hint: "{argument-hint}"
+user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
+imports: []
+hooks:
+  Stop:
+    - type: command
+      command: "node ${CLAUDE_PLUGIN_ROOT}/scripts/{name}-stop.js"
+      timeout: 10000

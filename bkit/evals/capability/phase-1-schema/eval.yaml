@@ -1,0 +1,23 @@
+name: phase-1-schema
+classification: capability
+version: 1.6.1
+description: "phase-1-schema output quality evaluation"
+
+evals:
+  - name: output-quality
+    prompt: prompt-1.md
+    expected: expected-1.md
+    criteria:
+      - "Must produce accurate and relevant output"
+      - "Must follow documented patterns"
+    timeout: 60000
+
+parity_test:
+  enabled: true
+  description: "Tests if model can perform equally well without this skill"
+
+benchmark:
+  model_baseline: "claude-sonnet-4-6"
+  metrics:
+    - output_quality
+    - model_parity

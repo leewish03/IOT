@@ -1,0 +1,22 @@
+name: "{name}"
+classification: "{classification}"
+version: 1.6.1
+description: "{name} skill evaluation"
+
+evals:
+  - name: basic-trigger
+    prompt: prompt-1.md
+    expected: expected-1.md
+    criteria:
+      - "Must trigger correctly on relevant keywords"
+      - "Must produce expected output format"
+    timeout: 60000
+
+parity_test:
+  enabled: false  # Set to true for capability skills
+
+benchmark:
+  model_baseline: "claude-sonnet-4-6"
+  metrics:
+    - trigger_accuracy
+    - output_quality

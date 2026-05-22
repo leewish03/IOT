@@ -1,0 +1,109 @@
+name: Invocation Contract Check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, feat/**]
+
+jobs:
+  contract-l1-l4:
+    name: Contract Test (L1 Frontmatter + L4 Deprecation)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Self-contained: no npm install required (bkit runtime deps = 0).
+      - name: Show working tree
+        run: |
+          ls -la
+          echo "---"
+          node --version
+
+      - name: Domain Layer Purity Check (Sprint 5.5 — Clean Architecture enforcement)
+        run: node scripts/check-domain-purity.js
+
+      - name: L1+L4 vs v2.1.9 LTS baseline (long-term drift detection)
+        run: node test/contract/scripts/contract-test-run.js --compare v2.1.9 --level L1,L4
+
+      # v2.1.17: Dual baseline — Latest snapshot acts as noise floor for
+      # immediate regression detection between minor releases. See
+      # docs/06-guide/contract-baseline-rollforward.guide.md for rollforward SOP.
+      - name: L1+L4 vs v2.1.16 Latest baseline (noise floor)
+        run: node test/contract/scripts/contract-test-run.js --compare v2.1.16 --level L1,L4
+
+      - name: Guard Registry validation
+        run: node scripts/check-guards.js
+
+      # v2.1.17 (CO-7): detect untracked production test files. Defends
+      # against silent .gitignore regression that previously masked CI-
+      # referenced test files (Cannot find module errors).
+      - name: Test File Tracking validation
+        run: node scripts/check-test-tracking.js
+
+      - name: Docs=Code cross-check (Sprint 4, ENH-241)
+        run: node scripts/docs-code-sync.js
+
+      - name: Dead code detection (Sprint 4.5 — prevent new dead code in v2.1.10+)
+        run: node scripts/check-deadcode.js
+
+      - name: Runtime Integration Tests (Sprint 4.5 — recursion guard + prod hook paths)
+        run: node test/contract/integration-runtime.test.js
+
+      # v2.1.17: L2 + L3 layer tests promoted from observational to mandatory.
+      # 5/12 cleanup masked Agent removal because only L1+L4 ran in CI.
+      # L2 = hook smoke + attribution, L3 = MCP static compat + runtime.
+      - name: L2 Smoke (hook handler invocation)
+        run: node test/contract/l2-smoke.test.js
+
+      - name: L2 Hook Attribution (cc-regression + PreCompact counter)
+        run: node test/contract/l2-hook-attribution.test.js
+
+      - name: L3 MCP Compatibility (static schema)
+        run: node test/contract/l3-mcp-compat.test.js
+
+      - name: L3 MCP Runtime (stdio JSON-RPC lifecycle)
+        run: node test/contract/l3-mcp-runtime.test.js
+
+      - name: Aggregate all tests (summary)
+        run: node test/contract/scripts/qa-aggregate.js | tail -10
+
+      # v2.1.16 release-hardening: explicit release gate.
+      # bkit-full-system verifies version-sync across README/hooks/manifests +
+      # agent/skill structure. docs-code-sync detects counts drift between SoT
+      # (lib/domain/rules/docs-code-invariants.js) and live filesystem.
+      # Both were previously visible only via local `qa-aggregate` run; promoting
+      # them to mandatory CI steps prevents v2.1.14/15/16-style release defects
+      # where stale metadata shipped despite tests existing.
+      - name: Release Gate — bkit-full-system (version sync + agent/skill structure)
+        run: node tests/qa/bkit-full-system.test.js
+
+      - name: Release Gate — docs-code-sync (counts SoT drift detector)
+        run: node test/contract/docs-code-sync.test.js
+
+  contract-l5-e2e:
+    name: Contract Test L5 (Invocation Inventory)
+    runs-on: ubuntu-latest
+    needs: contract-l1-l4
+    # v2.1.18 (CO-3): promoted from observational (continue-on-error: true)
+    # to mandatory gate. Depends on contract-l1-l4 — only runs after L1+L4
+    # passes (avoids redundant fail reports). invocation-inventory.test.js
+    # baseline as of v2.1.18: 203 TC across skills/agents/hooks/MCP tools.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: L5 Invocation Inventory (static surface verification)
+        run: |
+          if [ -f test/contract/invocation-inventory.test.js ]; then
+            node test/contract/invocation-inventory.test.js
+          else
+            echo "ERROR: test/contract/invocation-inventory.test.js missing"
+            exit 1
+          fi
