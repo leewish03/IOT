@@ -1,0 +1,20 @@
+{
+  "name": "bkit",
+  "version": "2.1.19",
+  "displayName": "bkit — AI Native Development OS",
+  "description": "The only Claude Code plugin that verifies AI-generated code against its own design specs.",
+  "author": {
+    "name": "POPUP STUDIO PTE. LTD.",
+    "email": "contact@popupstudio.ai",
+    "url": "https://popupstudio.ai"
+  },
+  "repository": "https://github.com/popup-studio-ai/bkit-claude-code",
+  "license": "Apache-2.0",
+  "keywords": [
+    "pdca", "development-automation", "agent-teams", "quality-gates",
+    "workflow-engine", "ai-native", "vibecoding", "fullstack",
+    "multilingual", "enterprise", "code-quality", "design-sync",
+    "controllable-ai", "audit-logging", "mcp-server"
+  ],
+  "outputStyles": "./output-styles/"
+}

@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "bkit-pdca": {
+      "command": "node",
+      "args": ["bkit/servers/bkit-pdca-server/index.js"],
+      "env": {
+        "BKIT_ROOT": "${workspaceFolder}"
+      }
+    },
+    "bkit-analysis": {
+      "command": "node",
+      "args": ["bkit/servers/bkit-analysis-server/index.js"],
+      "env": {
+        "BKIT_ROOT": "${workspaceFolder}"
+      }
+    }
+  }
+}

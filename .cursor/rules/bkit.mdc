@@ -1,0 +1,53 @@
+---
+description: bkit AI Native Development OS — PDCA, Sprint, quality gates, and skill routing for Cursor
+alwaysApply: true
+---
+
+# bkit on Cursor
+
+This project includes **bkit** (vendored under `bkit/`). Use it as the primary development workflow kit.
+
+## Language
+
+- Reply to the user in **Korean**.
+- Code, commits, PR text, and non-`docs/` markdown stay in **English** (see `bkit/.claude/CLAUDE.md`).
+- Planning artifacts under `docs/01-plan/`, `docs/02-design/`, `docs/03-analysis/`, `docs/04-report/` are written in **Korean** unless the user asks otherwise.
+
+## Command mapping (Claude Code → Cursor)
+
+| User intent | Action |
+|-------------|--------|
+| `/pdca`, `/sprint`, `/control`, `bkit help` | Read `bkit/skills/bkit/SKILL.md`, then the skill for that workflow (`pdca`, `sprint`, `control`) |
+| PDCA phase (plan, design, do, analyze, iterate, qa, report) | Read `bkit/skills/pdca/SKILL.md` and follow the phase; use `bkit/agents/*.md` personas via **Task** subagents when the skill names an agent |
+| Sprint (master-plan, start, status, …) | Read `bkit/skills/sprint/SKILL.md` |
+| Quality / gap / review | `gap-detector`, `code-analyzer`, `design-validator` → Task with matching `bkit/agents/<name>.md` |
+| PM / team / QA teams | `pm-lead`, `qa-lead`, `cto-lead` agents under `bkit/agents/` |
+| Pipeline phases 1–9 | `bkit/skills/phase-*` and `development-pipeline` |
+
+Slash commands are **documentation labels**. In Cursor, trigger the same behavior by naming the action in natural language (Korean or English) or by saying e.g. "pdca plan user-auth".
+
+## MCP tools
+
+When PDCA status, doc paths, or gap metrics are needed, use MCP servers **bkit-pdca** and **bkit-analysis** (configured in `.cursor/mcp.json`). Set `BKIT_ROOT` to the workspace root.
+
+## State and config
+
+- Config: `bkit.config.json` (copy or symlink from `bkit/bkit.config.json` at repo root if missing).
+- Runtime state: `.bkit/` (gitignored) — create on first PDCA/sprint run.
+- Doc layout: `docs/01-plan/`, `docs/02-design/`, `docs/03-analysis/`, `docs/04-report/` per `bkit.config.json` `pdca.docPaths`.
+
+## Quality gates (summary)
+
+Do not advance PDCA/sprint phases when gates fail: **M1** match rate &lt; 90% → iterate (max 5); **M3** critical issues → stop; **S1** dataFlow &lt; 85% → re-verify. Details in `bkit/README.md` and `bkit/skills/pdca/SKILL.md`.
+
+## Skills discovery
+
+Project skills are linked under `.cursor/skills/` (run `scripts/setup-bkit-cursor.sh` after clone). You may also read skills directly from `bkit/skills/<name>/SKILL.md`.
+
+## Subagents
+
+For parallel specialist work, use the **Task** tool with prompts derived from `bkit/agents/<agent>.md` frontmatter and body. See root `AGENTS.md` for a quick index.
+
+## IoT project
+
+Application code for this repo lives outside `bkit/`; use bkit for **how** you plan, design, verify, and document features—not as runtime dependency unless explicitly integrated.

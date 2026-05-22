@@ -1,0 +1,226 @@
+{
+  "version": "2.1.19",
+  "ui": {
+    "sessionTitle": {
+      "enabled": true,
+      "staleTTLHours": 24,
+      "format": "[bkit] {action} {feature}"
+    },
+    "dashboard": {
+      "enabled": true,
+      "sections": ["progress", "workflow", "impact", "agent", "control", "sqm"]
+    },
+    "contextInjection": {
+      "enabled": true,
+      "ambiguityThreshold": 0.7,
+      "sections": [
+        "onboarding",
+        "agentTeams",
+        "outputStyles",
+        "bkendMcp",
+        "enterpriseBatch",
+        "pdcaCoreRules",
+        "automation",
+        "versionEnhancements"
+      ],
+      "maxChars": 8000,
+      "priorityPreserve": [
+        "MANDATORY",
+        "Previous Work Detected",
+        "AskUserQuestion"
+      ]
+    }
+  },
+  "control": {
+    "fastTrack": {
+      "enabled": true,
+      "minTrustScore": 80,
+      "autoLevel": "L3",
+      "skipCheckpoints": [1, 2, 3, 4, 5, 6, 7, 8],
+      "fallbackLevel": "L2"
+    }
+  },
+  "pdca": {
+    "docPaths": {
+      "plan": [
+        "docs/01-plan/features/{feature}.plan.md",
+        "docs/01-plan/{feature}.plan.md",
+        "docs/plan/{feature}.md"
+      ],
+      "design": [
+        "docs/02-design/features/{feature}.design.md",
+        "docs/02-design/{feature}.design.md",
+        "docs/design/{feature}.md"
+      ],
+      "analysis": [
+        "docs/03-analysis/{feature}.analysis.md",
+        "docs/03-analysis/features/{feature}.analysis.md",
+        "docs/03-analysis/{feature}.gap-analysis.md"
+      ],
+      "report": [
+        "docs/04-report/features/{feature}.report.md",
+        "docs/04-report/{feature}.report.md",
+        "docs/04-report/{feature}.completion-report.md"
+      ],
+      "archive": "docs/archive/{date}/{feature}"
+    },
+    "matchRateThreshold": 90,
+    "autoIterate": true,
+    "maxIterations": 5,
+    "requireDesignDoc": true,
+    "automationLevel": "semi-auto",
+    "autoStartThreshold": 100,
+    "fullAuto": {
+      "reviewCheckpoints": ["design"]
+    }
+  },
+  "sprint": {
+    "_comment": "v2.1.13 Sprint Management defaults (DEEP-6). Per-sprint overrides via sprint.config.{...} at sprint init time take precedence.",
+    "defaultTrustLevel": "L2",
+    "defaultBudget": 1000000,
+    "defaultPhaseTimeoutHours": 4,
+    "defaultMaxIterations": 5,
+    "defaultMatchRateTarget": 100,
+    "defaultMatchRateMinAcceptable": 90,
+    "defaultDashboardMode": "session-start",
+    "autoPause": {
+      "armedTriggers": ["QUALITY_GATE_FAIL", "ITERATION_EXHAUSTED", "BUDGET_EXCEEDED", "PHASE_TIMEOUT"]
+    },
+    "qualityGates": {
+      "M1_matchRate": { "threshold": 90 },
+      "M2_codeQualityScore": { "threshold": 80 },
+      "M3_criticalIssueCount": { "threshold": 0 },
+      "M8_matchRate": { "threshold": 85 }
+    },
+    "contextSizing": {
+      "enabled": true,
+      "schemaVersion": "1.0",
+      "maxTokensPerSprint": 100000,
+      "safetyMargin": 0.25,
+      "tokensPerLOC": 6.67,
+      "baselineLOC": 5000,
+      "minSprints": 1,
+      "maxSprints": 12,
+      "dependencyAware": true
+    }
+  },
+  "triggers": {
+    "implicitEnabled": true,
+    "confidenceThreshold": 0.7,
+    "clarifyAmbiguity": true
+  },
+  "pipeline": {
+    "autoTransition": false,
+    "skipConfirmation": false
+  },
+  "multiFeature": {
+    "maxActiveFeatures": 5,
+    "autoSwitch": true
+  },
+  "featurePatterns": [
+    "features",
+    "modules",
+    "packages",
+    "apps",
+    "services",
+    "domains"
+  ],
+  "fileDetection": {
+    "sourceExtensions": [],
+    "excludePatterns": [
+      "node_modules",
+      ".git",
+      "dist",
+      "build",
+      ".next",
+      "__pycache__",
+      "vendor",
+      "target",
+      ".cache",
+      ".turbo",
+      "coverage"
+    ]
+  },
+  "cache": {
+    "enabled": true,
+    "ttl": 5000
+  },
+  "performance": {
+    "promptCaching1h": {
+      "recommended": true,
+      "envVar": "ENABLE_PROMPT_CACHING_1H",
+      "ccMinVersion": "v2.1.108",
+      "note": "Set ENABLE_PROMPT_CACHING_1H=1 in shell before launching CC for 30-40% token savings on long PDCA sessions. ENH-265 (bkit v2.1.9)."
+    }
+  },
+  "permissions": {
+    "Write": "allow",
+    "Edit": "allow",
+    "Read": "allow",
+    "Bash": "allow",
+    "Bash(rm -rf*)": "deny",
+    "Bash(rm -r*)": "ask",
+    "Bash(git push --force*)": "deny",
+    "Bash(git reset --hard*)": "ask"
+  },
+  "automation": {
+    "defaultLevel": 2,
+    "trustScoreEnabled": true,
+    "autoEscalation": false,
+    "autoDowngrade": true,
+    "maxConcurrentFeatures": 3,
+    "gateTimeoutMs": 300000,
+    "emergencyStopEnabled": true
+  },
+  "guardrails": {
+    "destructiveDetection": true,
+    "loopBreaker": {
+      "maxPdcaIterations": 5,
+      "maxSameFileEdits": 10,
+      "maxAgentRecursion": 3,
+      "cooldownMs": 60000
+    },
+    "blastRadiusLimit": "high",
+    "checkpointOnPhaseTransition": true,
+    "checkpointOnDestructive": true
+  },
+  "quality": {
+    "gateEnabled": true,
+    "metricsCollection": true,
+    "regressionGuard": true,
+    "thresholds": {
+      "matchRate": 90,
+      "codeQualityScore": 70,
+      "criticalIssueCount": 0,
+      "conventionCompliance": 90
+    },
+    "historyMaxDataPoints": 100
+  },
+  "team": {
+    "enabled": true,
+    "displayMode": "in-process",
+    "maxTeammates": 5,
+    "delegateMode": false,
+    "ctoAgent": "cto-lead",
+    "levelOverrides": {
+      "Dynamic": { "maxTeammates": 3 },
+      "Enterprise": { "maxTeammates": 5 }
+    },
+    "orchestrationPatterns": {
+      "Dynamic": {
+        "plan": "leader",
+        "design": "leader",
+        "do": "swarm",
+        "check": "council",
+        "act": "leader"
+      },
+      "Enterprise": {
+        "plan": "leader",
+        "design": "council",
+        "do": "swarm",
+        "check": "council",
+        "act": "watchdog"
+      }
+    }
+  }
+}

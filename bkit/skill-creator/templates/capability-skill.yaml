@@ -1,0 +1,19 @@
+# Capability Skill Template
+# Classification: capability (guidance that may become redundant)
+# Deprecation Risk: medium (default)
+name: "{name}"
+classification: capability
+classification-reason: "Development guidance that may become redundant as models improve"
+deprecation-risk: medium
+description: |
+  {description}
+argument-hint: "{argument-hint}"
+user-invocable: true
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Bash
+imports: []
