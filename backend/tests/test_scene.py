@@ -178,6 +178,21 @@ class SceneApiTests(unittest.TestCase):
         self.assertIn("scene.get_latest", names)
         self.assertIn("scene.analyze", names)
 
+    def test_scene_analyze_empty_upload_returns_400(self) -> None:
+        response = self.client.post("/scene/analyze", files={"file": ("empty.png", io.BytesIO(b""), "image/png")})
+        self.assertEqual(response.status_code, 400)
+
+    def test_ws_scene_receives_snapshot_after_analyze(self) -> None:
+        png = _encode_png(_synthetic_bgr())
+        with self.client.websocket_connect("/ws/scene") as ws:
+            self.client.post(
+                "/scene/analyze",
+                files={"file": ("frame.png", io.BytesIO(png), "image/png")},
+            )
+            payload = ws.receive_json()
+            self.assertIn("person_count", payload)
+            self.assertIn("summary_ko", payload)
+
 
 if __name__ == "__main__":
     unittest.main()

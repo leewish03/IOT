@@ -61,6 +61,41 @@ export function HomeDashboard() {
   }, [refreshStatus]);
 
   useEffect(() => {
+    (async () => {
+      try {
+        const [settingsRes, historyRes] = await Promise.all([
+          fetch("/api/settings"),
+          fetch("/api/chat/history?limit=40"),
+        ]);
+        if (settingsRes.ok) {
+          const s = await settingsRes.json();
+          if (s.preferred_model) setModel(s.preferred_model as ModelKey);
+          if (typeof s.ai_auto_mode === "boolean") setAutoVision(s.ai_auto_mode);
+        }
+        if (historyRes.ok) {
+          const h = await historyRes.json();
+          if (Array.isArray(h.messages) && h.messages.length) {
+            setChat(h.messages as ChatLine[]);
+          }
+        }
+      } catch {
+        /* optional Supabase */
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ preferred_model: model, ai_auto_mode: autoVision }),
+      }).catch(() => {});
+    }, 600);
+    return () => clearTimeout(t);
+  }, [model, autoVision]);
+
+  useEffect(() => {
     if (!liveStreamOn) {
       eventSourceRef.current?.close();
       eventSourceRef.current = null;

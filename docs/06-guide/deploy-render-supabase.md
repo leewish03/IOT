@@ -71,6 +71,22 @@ Verify tables: **Table Editor** should list `scene_events` with RLS enabled.
 
 No manual copy of the orchestrator token is required if the Blueprint links succeed.
 
+### Pi 24h + Render dashboard (live camera)
+
+| Service | Role |
+|---------|------|
+| **Pi** | `iot-orchestrator` + `CAMERA_DEVICE` |
+| **Render** | `iot-dashboard` only |
+
+On **iot-dashboard**, override:
+
+```
+ORCHESTRATOR_URL=https://<your-pi-host>:8080
+ORCHESTRATOR_TOKEN=<same as Pi BACKEND_API_TOKEN>
+```
+
+On **Pi orchestrator**, set `CORS_ORIGINS=https://iot-fl68.onrender.com`.
+
 ## 4. Set API keys and Supabase in Render
 
 **iot-dashboard → Environment**:

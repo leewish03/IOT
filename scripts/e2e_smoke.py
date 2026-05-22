@@ -58,6 +58,9 @@ def main() -> int:
     try:
         get(f"{WEB}/api/orchestrator/tool?action=health")
         print("OK web proxy health (web server running)")
+        models = get(f"{WEB}/api/models")
+        assert "models" in models, models
+        print("OK web /api/models")
     except Exception as exc:
         print(f"SKIP web (start: cd web && npm run dev): {exc}")
 

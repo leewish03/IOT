@@ -39,7 +39,11 @@ class CameraStreamService:
     ) -> None:
         self.store = store
         self.device = device if device is not None else _parse_camera_device(os.getenv("CAMERA_DEVICE"))
-        self.fps_limit = fps_limit if fps_limit is not None else float(os.getenv("SCENE_FPS_LIMIT", "1.0"))
+        if fps_limit is not None:
+            self.fps_limit = fps_limit
+        else:
+            raw_fps = os.getenv("SCENE_FPS_LIMIT") or os.getenv("SCENE_FPS") or "1.0"
+            self.fps_limit = float(raw_fps)
         self.on_update = on_update
         self._analyzer = SceneAnalyzer()
         self._thread: threading.Thread | None = None

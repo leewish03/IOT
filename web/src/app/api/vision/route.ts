@@ -3,16 +3,27 @@ import { judgeSceneFromMetadata, runAgentChat } from "@/lib/agent";
 import { analyzeSceneImage } from "@/lib/orchestrator-client";
 import type { ModelKey } from "@/lib/models";
 import { createClient } from "@/lib/supabase/server";
-
-async function supabaseOptional() {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    return null;
-  }
-  return createClient();
-}
+import { persistSceneEvent } from "@/lib/supabase/persist";
 
 export async function POST(request: Request) {
   try {
+    const hasSupabase =
+      Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+      Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+    let supabase: Awaited<ReturnType<typeof createClient>> | null = null;
+    let userId: string | null = null;
+
+    if (hasSupabase) {
+      supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      userId = user.id;
+    }
     const form = await request.formData();
     const image = form.get("image");
     const modelKey = (String(form.get("model") ?? "claude-haiku-4.6")) as ModelKey;
@@ -41,22 +52,9 @@ export async function POST(request: Request) {
 
     const judgment = await judgeSceneFromMetadata({ modelKey, scene, prompt });
 
-    const supabase = await supabaseOptional();
-    if (supabase) {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from("vision_events").insert({
-          user_id: user.id,
-          analysis: judgment.analysis,
-          tool_calls: null,
-          scene_json: scene,
-        });
-      }
-    }
-
     let toolCalls: { name: string; result: unknown }[] = [];
+    let reply: string | undefined;
+
     if (autoAct && judgment.analysis) {
       const followUp = await runAgentChat({
         modelKey,
@@ -69,10 +67,24 @@ export async function POST(request: Request) {
         maxSteps: 4,
       });
       toolCalls = followUp.toolCalls;
+      reply = followUp.reply;
+    }
+
+    if (supabase && userId) {
+      await persistSceneEvent(supabase, userId, scene);
+      await supabase.from("vision_events").insert({
+        user_id: userId,
+        analysis: judgment.analysis,
+        tool_calls: toolCalls.length ? toolCalls : null,
+        scene_json: scene,
+      });
+    }
+
+    if (reply !== undefined) {
       return NextResponse.json({
         scene,
         analysis: judgment.analysis,
-        reply: followUp.reply,
+        reply,
         toolCalls,
       });
     }
