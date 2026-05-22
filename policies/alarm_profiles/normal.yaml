@@ -1,0 +1,8 @@
+profile_id: normal
+description: 기본 기상 프로필
+steps:
+  - speaker_alarm
+  - wait
+  - notify_mobile
+conditions:
+  - true

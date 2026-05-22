@@ -1,0 +1,5 @@
+environment_id: local
+timezone: Asia/Seoul
+calendar_provider: file
+home_assistant_mode: dry_run
+mqtt_mode: dry_run

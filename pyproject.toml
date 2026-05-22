@@ -1,0 +1,16 @@
+[project]
+name = "mcp-iot-home-orchestrator"
+version = "0.1.0"
+description = "MCP-based IoT home orchestrator MVP scaffold"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "pydantic>=2.7",
+  "PyYAML>=6.0",
+  "paho-mqtt>=2.1",
+  "httpx>=0.27",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]

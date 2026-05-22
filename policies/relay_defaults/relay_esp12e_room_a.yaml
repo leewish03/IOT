@@ -1,0 +1,6 @@
+device_id: relay_esp12e_room_a
+boot_mode: safe_off
+channels:
+  - ch1
+  - ch2
+fail_safe: all_off

@@ -1,0 +1,9 @@
+profile_id: aggressive
+description: 일정 지연 허용치가 낮은 날 사용하는 강한 기상 프로필
+steps:
+  - speaker_alarm
+  - wait
+  - speaker_alarm
+  - notify_mobile
+conditions:
+  - calendar.must_wake == true
