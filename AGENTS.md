@@ -11,6 +11,15 @@
 
 Project rules: `.cursor/rules/bkit.mdc` (`alwaysApply: true`).
 
+## IoT repo hints
+
+For this MCP IoT Home Orchestrator, prefer parallel agents such as:
+
+- `infra-architect.md` — deploy, Docker, edge topology
+- `security-architect.md` — API, policies, audit logs
+- `gap-detector.md` — design doc vs `backend/app` implementation
+- `qa-lead.md` — `backend/tests`, integration scenarios
+
 ---
 
 Specialist personas live in `bkit/agents/`. In Cursor, spawn them with the **Task** tool (`subagent_type`: `generalPurpose` or `explore`) and paste the relevant agent file as the system prompt basis.

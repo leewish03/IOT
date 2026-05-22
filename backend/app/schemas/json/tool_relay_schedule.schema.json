@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "relay.schedule input",
+  "type": "object",
+  "required": ["channel", "action", "execute_at"],
+  "properties": {
+    "device_id": {"type": "string"},
+    "channel": {"type": "string", "enum": ["ch1", "ch2"]},
+    "action": {"type": "string", "enum": ["on", "off"]},
+    "execute_at": {"type": "string", "format": "date-time"}
+  },
+  "additionalProperties": false
+}

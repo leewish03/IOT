@@ -12,7 +12,7 @@ alwaysApply: true
 1. **Before coding** — Infer feature name; check `docs/` and MCP `bkit-pdca` for existing PDCA state. If none, start at plan or read `bkit/skills/pdca/SKILL.md` for the right phase.
 2. **While coding** — Align with `docs/02-design/` if a design exists; apply `bkit/skills/phase-*` or `development-pipeline` when the task matches a phase.
 3. **After meaningful code changes** — Proactively run gap-style verification: read `bkit/skills/pdca/SKILL.md` analyze/iterate sections or spawn **Task** with `bkit/agents/gap-detector.md`. Do not skip quality gates (M1/M3/S1).
-4. **Non-trivial features** — Prefer parallel **Task** subagents (2–4 at once) using `bkit/agents/*.md` (e.g. security + frontend + QA) without waiting for the user to ask for "team mode".
+4. **Non-trivial features** — Prefer parallel **Task** subagents (2–4 at once) using `bkit/agents/*.md` (e.g. security + infra + QA) without waiting for the user to ask for "team mode".
 5. **Multi-feature or release work** — Use `bkit/skills/sprint/SKILL.md` (master-plan / start) without being asked.
 6. **Document** — Write or update Korean docs under `docs/01-plan`, `02-design`, `03-analysis`, `04-report` as phases complete.
 
@@ -37,7 +37,7 @@ This project includes **bkit** (vendored under `bkit/`). It is the **only** appr
 | PM / team / QA teams | `pm-lead`, `qa-lead`, `cto-lead` agents under `bkit/agents/` |
 | Pipeline phases 1–9 | `bkit/skills/phase-*` and `development-pipeline` |
 
-Slash commands are **documentation labels**. In Cursor, trigger the same behavior by naming the action in natural language (Korean or English) or by saying e.g. "pdca plan user-auth".
+Slash commands are **documentation labels**. In Cursor, trigger the same behavior by naming the action in natural language (Korean or English) or by saying e.g. "pdca plan relay-scheduler".
 
 ## MCP tools
 
@@ -45,7 +45,7 @@ When PDCA status, doc paths, or gap metrics are needed, use MCP servers **bkit-p
 
 ## State and config
 
-- Config: `bkit.config.json` (copy or symlink from `bkit/bkit.config.json` at repo root if missing).
+- Config: `bkit.config.json` at repo root.
 - Runtime state: `.bkit/` (gitignored) — create on first PDCA/sprint run.
 - Doc layout: `docs/01-plan/`, `docs/02-design/`, `docs/03-analysis/`, `docs/04-report/` per `bkit.config.json` `pdca.docPaths`.
 
@@ -61,6 +61,19 @@ Project skills are linked under `.cursor/skills/` (run `scripts/setup-bkit-curso
 
 For parallel specialist work, use the **Task** tool with prompts derived from `bkit/agents/<agent>.md` frontmatter and body. See root `AGENTS.md` for a quick index.
 
-## IoT project
+## IoT Home Orchestrator (application code)
 
-Application code for this repo lives outside `bkit/`; use bkit for **how** you plan, design, verify, and document features—not as runtime dependency unless explicitly integrated.
+Master spec: `iot_home_orchestrator_master_plan_v2.docx`. Application lives **outside** `bkit/`:
+
+| Path | Role |
+|------|------|
+| `backend/app/` | FastAPI orchestrator, MCP registry, relay/calendar/HA services |
+| `backend/tests/` | Unit tests |
+| `backend/app/schemas/json/` | JSON Schema contracts |
+| `policies/` | YAML relay, alarm, automation rules |
+| `edge/esp12e/`, `edge/pi_agent/` | Device/edge placeholders |
+| `deploy/docker-compose/` | Deployment templates |
+| `webui/` | Open WebUI config |
+| `data/` | Local store, mock calendar |
+
+Feature work (relay, calendar adapters, HA alarms, MCP tools) should use bkit PDCA docs in `docs/` while changing code under `backend/`, `policies/`, `edge/`, `deploy/` as appropriate.

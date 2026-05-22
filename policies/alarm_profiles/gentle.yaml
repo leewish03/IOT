@@ -1,0 +1,7 @@
+profile_id: gentle
+description: 낮은 강도의 일반 기상 프로필
+steps:
+  - speaker_alarm
+  - notify_mobile
+conditions:
+  - calendar.must_wake == false

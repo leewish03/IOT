@@ -1,6 +1,6 @@
 # bkit × Cursor 사용 가이드
 
-이 저장소는 [bkit-claude-code](https://github.com/popup-studio-ai/bkit-claude-code)를 `bkit/` 아래에 포함하고, Cursor Cloud Agent / IDE에서 동일한 워크플로를 쓸 수 있게 맞춰 두었습니다.
+이 저장소는 [bkit-claude-code](https://github.com/popup-studio-ai/bkit-claude-code)를 `bkit/` 아래에 포함하고, **MCP IoT 홈 오케스트레이터** 앱 코드와 함께 Cursor에서 동작하도록 맞춰 두었습니다.
 
 ## "매번 bkit 써줘" 말 안 해도 되게 — 프롬프트 저장 위치
 
@@ -8,7 +8,7 @@
 |-----------|------|-------------|
 | **`.cursor/rules/*.mdc`** + `alwaysApply: true` | 이 repo를 열 때 **항상** 적용되는 프로젝트 규칙 | ✅ `.cursor/rules/bkit.mdc` (적극 활용·병렬 Task·게이트 강제) |
 | **`AGENTS.md`** (repo 루트) | Cloud Agent / Agent 모드 기본 지시 | ✅ 루트 `AGENTS.md` |
-| **Cursor Settings → Rules** | 모든 프로젝트 공통 **사용자 규칙** | 선택: "IOT repo uses bkit" 한 줄만 넣어도 됨 |
+| **Cursor Settings → Rules** | 모든 프로젝트 공통 **사용자 규칙** | 선택 |
 | **`.cursor/skills/`** | 스킬 정의 (호출 가능한 워크플로) | ✅ `bkit/skills` 링크 44개 |
 | ~~채팅에 매번 붙이기~~ | 비추천 | 규칙 파일로 대체함 |
 
@@ -26,6 +26,18 @@
 
 Cursor **Settings → MCP**에서 `.cursor/mcp.json`의 `bkit-pdca`, `bkit-analysis` 서버가 활성인지 확인하세요.
 
+## IoT 앱 디렉터리 (bkit 밖)
+
+| 경로 | 내용 |
+|------|------|
+| `backend/app/` | 오케스트레이터, MCP 레지스트리, 릴레이·캘린더·HA |
+| `policies/` | YAML 정책 |
+| `edge/` | ESP12E, Pi 에이전트 |
+| `deploy/` | Docker Compose |
+| `webui/` | Open WebUI 설정 |
+
+기능 개발 시 bkit으로 `docs/`에 계획·설계를 쓰고, 코드는 위 경로에 반영합니다.
+
 ## Claude Code와의 차이
 
 | Claude Code | Cursor |
@@ -37,8 +49,8 @@ Cursor **Settings → MCP**에서 `.cursor/mcp.json`의 `bkit-pdca`, `bkit-analy
 
 ## 추천 시작 순서
 
-1. **단일 기능**: "pdca pm 로그인" → PM 분석 후 plan/design/do…
-2. **여러 기능 릴리스**: "sprint master-plan Q2 --features auth,billing"
+1. **단일 기능**: "pdca pm 릴레이-예약" → PM 분석 후 plan/design/do…
+2. **여러 기능 릴리스**: "sprint master-plan Q2 --features relay,calendar,ha-alarm"
 3. **자동화 수준**: "control level 2" (기본: L2 반자동)
 
 ## 문서 위치
@@ -58,15 +70,10 @@ Cursor **Settings → MCP**에서 `.cursor/mcp.json`의 `bkit-pdca`, `bkit-analy
 
 자세한 내용: `bkit/README.md`, `bkit/README-FULL.md`.
 
-## IOT 프로젝트와 함께
-
-애플리케이션 코드는 `bkit/` 밖에 두고, 기능 개발·검증·문서화만 bkit 워크플로를 사용하면 됩니다.
-
 ## 업스트림 업데이트
 
 ```bash
-cd bkit && git pull   # submodule을 쓰는 경우
-# 또는 popup-studio-ai/bkit-claude-code 에서 새 릴리스를 bkit/에 다시 복사
+# popup-studio-ai/bkit-claude-code 새 릴리스를 bkit/에 반영 후
 ./scripts/setup-bkit-cursor.sh
 ```
 

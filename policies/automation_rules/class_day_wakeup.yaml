@@ -1,0 +1,9 @@
+rule_id: class_day_wakeup
+trigger: calendar_offset
+offset_min: -30
+conditions:
+  - next_event.must_wake == true
+actions:
+  - alarm.update_profile
+  - alarm.create
+enabled: true

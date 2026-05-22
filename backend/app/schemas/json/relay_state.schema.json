@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RelayState",
+  "type": "object",
+  "required": ["device_id", "channels", "online", "last_seen"],
+  "properties": {
+    "device_id": {"type": "string"},
+    "channels": {
+      "type": "object",
+      "required": ["ch1", "ch2"],
+      "properties": {
+        "ch1": {"type": "boolean"},
+        "ch2": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "online": {"type": "boolean"},
+    "last_seen": {"type": "string", "format": "date-time"},
+    "firmware": {"type": "string"},
+    "rssi": {"type": ["integer", "null"]},
+    "last_command_result": {"type": ["string", "null"]}
+  }
+}
