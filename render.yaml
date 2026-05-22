@@ -6,7 +6,7 @@
 #   iot-dashboard.ORCHESTRATOR_TOKEN ← iot-orchestrator.BACKEND_API_TOKEN
 #
 # After first deploy, set iot-orchestrator.CORS_ORIGINS to the dashboard public URL
-# (e.g. https://iot-dashboard.onrender.com) if the default hostname differs.
+# Production dashboard: https://iot-fl68.onrender.com (srv-d88dg2rbc2fs73eqisgg)
 
 services:
   - type: web
@@ -19,7 +19,7 @@ services:
       - key: APP_ENV
         value: production
       - key: CORS_ORIGINS
-        value: https://iot-dashboard.onrender.com
+        value: https://iot-fl68.onrender.com
       - key: BACKEND_API_TOKEN
         generateValue: true
       - key: SCENE_FPS_LIMIT

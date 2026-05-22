@@ -91,7 +91,7 @@ Checklist script: `scripts/render-env-checklist.sh`
 
 ## 5. Connect orchestrator URL and CORS
 
-1. **Dashboard → iot-dashboard** — note the public URL (e.g. `https://iot-dashboard.onrender.com`).
+1. **Production dashboard:** https://iot-fl68.onrender.com (`srv-d88dg2rbc2fs73eqisgg`). See `deploy/render-production.env.md`.
 2. **Dashboard → iot-orchestrator → Environment**:
    - Set `CORS_ORIGINS` to that URL (comma-separated if you add more origins).
 3. Confirm **iot-dashboard** has:

@@ -12,7 +12,7 @@ Render env checklist — Jarvis IoT (render.yaml)
 | CORS_ORIGINS        | default URL*     | Update to real dashboard URL after deploy |
 | BACKEND_API_TOKEN   | generateValue    | —            |
 
-* Default: https://iot-dashboard.onrender.com — change if Render assigns another hostname.
+* Production dashboard: https://iot-fl68.onrender.com (srv-d88dg2rbc2fs73eqisgg)
 
 === iot-dashboard (web) ===
 | Variable                         | Set by Blueprint     | You must set (sync:false) |
