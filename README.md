@@ -182,7 +182,7 @@ cp web/.env.example web/.env.local   # API 키
 cd web && npm run dev                # 터미널 2 → http://localhost:3000
 ```
 
-가이드: [docs/04-report/features/jarvis-phases-0-3-4-5.report.md](docs/04-report/features/jarvis-phases-0-3-4-5.report.md)
+가이드: [docs/04-report/features/jarvis-phases-0-3-4-5.report.md](docs/04-report/features/jarvis-phases-0-3-4-5.report.md) · Render+Supabase: [docs/06-guide/deploy-render-supabase.md](docs/06-guide/deploy-render-supabase.md)
 
 ## 문의·다음 단계
 

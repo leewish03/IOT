@@ -1,5 +1,12 @@
 # Render Blueprint — Jarvis IoT stack
 # https://render.com/docs/blueprint-spec
+#
+# Cross-service env (fromService):
+#   iot-dashboard.ORCHESTRATOR_URL  ← iot-orchestrator (hostport)
+#   iot-dashboard.ORCHESTRATOR_TOKEN ← iot-orchestrator.BACKEND_API_TOKEN
+#
+# After first deploy, set iot-orchestrator.CORS_ORIGINS to the dashboard public URL
+# (e.g. https://iot-dashboard.onrender.com) if the default hostname differs.
 
 services:
   - type: web
@@ -24,6 +31,7 @@ services:
     startCommand: npm run start
     plan: starter
     envVars:
+      # Linked to iot-orchestrator (Render injects at deploy)
       - key: ORCHESTRATOR_URL
         fromService:
           name: iot-orchestrator
@@ -33,6 +41,31 @@ services:
         fromService:
           name: iot-orchestrator
           envVarKey: BACKEND_API_TOKEN
+      # Supabase (Project Settings → API)
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      # LLM providers (Dashboard → Environment)
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      # Model overrides (optional; defaults in web/src/lib/models.ts)
+      - key: ANTHROPIC_HAIKU_MODEL
+        value: claude-haiku-4-6
+      - key: ANTHROPIC_HAIKU_FALLBACK_MODEL
+        value: claude-haiku-4-5-20251001
+      - key: OPENAI_NANO_MODEL
+        value: gpt-5.4-nano
+      - key: OPENAI_NANO_FALLBACK_MODEL
+        value: gpt-5.4-nano-2026-03-17
+      - key: OPENAI_VISION_MODEL
+        value: gpt-5.4-nano
+      - key: OPENAI_STT_MODEL
+        value: whisper-1
 
   - type: workflow
     name: iot-workflows
