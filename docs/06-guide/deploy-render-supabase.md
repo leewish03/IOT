@@ -11,6 +11,17 @@ Jarvis dashboard (`web/`) on Render with optional Supabase persistence. Orchestr
 
 ## 1. Create a Supabase project
 
+**이 저장소에 MCP로 연결·적용된 프로젝트 (2026-05-22):**
+
+| 항목 | 값 |
+|------|-----|
+| 이름 | `persona-gospel` |
+| Project ref | `wyqpcldqlyrqbppjdhhp` |
+| API URL | `https://wyqpcldqlyrqbppjdhhp.supabase.co` |
+| 적용 마이그레이션 | `jarvis_dashboard`, `jarvis_scene_events` + profiles 트리거·`vision_events.scene_json` |
+
+다른 프로젝트를 쓰려면 아래 1번부터 새로 진행하세요.
+
 1. [Supabase Dashboard](https://supabase.com/dashboard) → **New project** (pick region, set DB password).
 2. Wait until the project is **Active**.
 3. **Project Settings → API** — copy:

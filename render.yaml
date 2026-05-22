@@ -69,10 +69,6 @@ services:
       - key: OPENAI_STT_MODEL
         value: whisper-1
 
-  - type: workflow
-    name: iot-workflows
-    runtime: python
-    rootDir: workflows
-    buildCommand: pip install -r requirements.txt
-    startCommand: python main.py
-    plan: starter
+# Render Workflows are NOT Blueprint-compatible (beta).
+# Create manually: Dashboard → New → Workflow → repo rootDir workflows/
+# See docs/06-guide/deploy-render-workflows.md
