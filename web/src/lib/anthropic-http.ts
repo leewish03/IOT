@@ -14,35 +14,55 @@ export type AnthropicMessage = {
 
 export async function anthropicMessagesCreate(params: {
   model: string;
+  fallbackModel?: string;
   system: string;
   tools: { name: string; description: string; input_schema: Record<string, unknown> }[];
   messages: AnthropicMessage[];
   max_tokens?: number;
 }): Promise<{ content: AnthropicContentBlock[] }> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
+  const rawKey = process.env.ANTHROPIC_API_KEY;
+  if (!rawKey) {
     throw new Error("ANTHROPIC_API_KEY not configured");
   }
+  const anthropicKey: string = rawKey;
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
+  async function request(model: string) {
+    const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      "x-api-key": apiKey,
+      "x-api-key": anthropicKey,
       "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: params.model,
-      max_tokens: params.max_tokens ?? 1024,
-      system: params.system,
-      tools: params.tools,
-      messages: params.messages,
-    }),
-  });
-
-  const body = await response.json();
-  if (!response.ok) {
-    throw new Error(body.error?.message ?? `Anthropic HTTP ${response.status}`);
+    };
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        model,
+        max_tokens: params.max_tokens ?? 1024,
+        system: params.system,
+        tools: params.tools,
+        messages: params.messages,
+      }),
+    });
+    const body = await response.json();
+    return { response, body };
   }
-  return { content: body.content as AnthropicContentBlock[] };
+
+  const primary = await request(params.model);
+  if (primary.response.ok) {
+    return { content: primary.body.content as AnthropicContentBlock[] };
+  }
+
+  const fallback = params.fallbackModel;
+  const notFound =
+    primary.response.status === 404 ||
+    String(primary.body.error?.message ?? "").toLowerCase().includes("model");
+  if (fallback && notFound) {
+    const second = await request(fallback);
+    if (second.response.ok) {
+      return { content: second.body.content as AnthropicContentBlock[] };
+    }
+    throw new Error(second.body.error?.message ?? `Anthropic HTTP ${second.response.status}`);
+  }
+
+  throw new Error(primary.body.error?.message ?? `Anthropic HTTP ${primary.response.status}`);
 }

@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { MODEL_OPTIONS, type ModelKey } from "@/lib/models";
+import { MODEL_CATALOG_AS_OF, MODEL_OPTIONS, type ModelKey } from "@/lib/models";
 
 type ChatLine = { role: "user" | "assistant"; content: string };
 
@@ -161,19 +161,22 @@ export function HomeDashboard() {
 
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex flex-col gap-2">
-          <Label>AI 모델</Label>
+          <Label>AI 모델 ({MODEL_CATALOG_AS_OF} 기준)</Label>
           <Select value={model} onValueChange={(v) => setModel(v as ModelKey)}>
-            <SelectTrigger className="w-[220px]">
+            <SelectTrigger className="w-[280px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {MODEL_OPTIONS.map((m) => (
                 <SelectItem key={m.key} value={m.key}>
-                  {m.label}
+                  {m.label} — {m.apiModel}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+          <p className="text-muted-foreground max-w-md text-xs">
+            {MODEL_OPTIONS.find((m) => m.key === model)?.catalogNote}
+          </p>
         </div>
         <div className="flex items-center gap-2 pt-6">
           <Switch checked={autoVision} onCheckedChange={setAutoVision} id="auto-vision" />

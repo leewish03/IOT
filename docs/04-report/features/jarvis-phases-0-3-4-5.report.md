@@ -26,7 +26,7 @@
 ## Phase 5 ✅
 
 - Next.js + shadcn `HomeDashboard`
-- 모델: **Claude Haiku 4.6** (`claude-haiku-4-5-20251001`), **GPT-5.4 nano** (`gpt-4.1-nano`)
+- 모델 (**2026-05 기준**): **Claude Haiku 4.6** → API `claude-haiku-4-6` (미개통 시 `claude-haiku-4-5-20251001`), **GPT-5.4 nano** → `gpt-5.4-nano` (스냅샷 `gpt-5.4-nano-2026-03-17`)
 - Supabase migration: `supabase/migrations/20260522100000_jarvis_dashboard.sql`
 - Render: `render.yaml` (orchestrator, dashboard, workflows)
 

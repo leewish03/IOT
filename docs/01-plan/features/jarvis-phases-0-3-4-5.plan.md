@@ -2,7 +2,7 @@
 
 ## Goal
 
-대시보드에서 **수동 IoT 제어**, **채팅 명령**, **음성(Phase 3)**, **비전 판단(Phase 4)** 이 실제 동작하며, AI 모델 **Claude Haiku 4.5** / **GPT-4.1 nano** 선택 가능. Supabase + Render + shadcn 웹.
+대시보드에서 **수동 IoT 제어**, **채팅 명령**, **음성(Phase 3)**, **비전 판단(Phase 4)** 이 실제 동작하며, AI 모델 **Claude Haiku 4.6** / **GPT-5.4 nano** 선택 가능. Supabase + Render + shadcn 웹.
 
 ## Phase 정의
 

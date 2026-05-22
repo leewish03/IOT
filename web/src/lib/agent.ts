@@ -83,6 +83,7 @@ export async function runAgentChat(params: {
   for (let step = 0; step < maxSteps; step += 1) {
     const response = await anthropicMessagesCreate({
       model: model.apiModel,
+      fallbackModel: model.fallbackApiModel,
       system: SYSTEM_PROMPT,
       tools: toAnthropicTools(tools),
       messages: anthropicMessages,
@@ -124,10 +125,12 @@ export async function analyzeVision(params: {
     params.prompt ??
     "Describe the room scene. Recommend IoT actions (lights, AC, alarm) in Korean. If obvious, list tool names to call.";
 
+  const visionModel = resolveModel(params.modelKey).visionApiModel;
+
   if (params.modelKey === "gpt-5.4-nano") {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const completion = await openai.chat.completions.create({
-      model: process.env.OPENAI_VISION_MODEL ?? "gpt-4.1-mini",
+      model: visionModel,
       messages: [
         {
           role: "user",
@@ -145,31 +148,23 @@ export async function analyzeVision(params: {
     return { analysis, suggestedActions: [], toolCalls: [] };
   }
 
-  const model = resolveModel(params.modelKey);
-  const response = await anthropicMessagesCreate({
-    model: model.apiModel,
-    system: "Describe images for home automation. Reply in Korean.",
-    tools: [],
+  // May 2026: multimodal vision via GPT-5.4 nano (Haiku chat may be text-only on API).
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const completion = await openai.chat.completions.create({
+    model: visionModel,
     messages: [
       {
         role: "user",
         content: [
-          {
-            type: "image",
-            source: {
-              type: "base64",
-              media_type: params.mimeType,
-              data: params.imageBase64,
-            },
-          },
           { type: "text", text: userText },
+          {
+            type: "image_url",
+            image_url: { url: `data:${params.mimeType};base64,${params.imageBase64}` },
+          },
         ],
       },
     ],
   });
-  const analysis = response.content
-    .filter((b) => b.type === "text")
-    .map((b) => (b.type === "text" ? b.text : ""))
-    .join("");
+  const analysis = completion.choices[0].message.content ?? "";
   return { analysis, suggestedActions: [], toolCalls: [] };
 }
