@@ -1,12 +1,20 @@
 # Render production — leewish03/IOT
 
-## Deployed service
+## Deployed service — **API only (not the browser UI)**
 
 | 항목 | 값 |
 |------|-----|
 | Service ID | `srv-d88dg2rbc2fs73eqisgg` |
 | Public URL | https://iot-fl68.onrender.com |
-| Dashboard 링크 | https://dashboard.render.com/web/srv-d88dg2rbc2fs73eqisgg |
+| 역할 | **FastAPI 오케스트레이터** (`/health`, `/tools`, `/scene/*`) |
+| 브라우저 UI | ❌ 이 URL 아님 → `web/` 으로 **별도** Render Web Service 필요 |
+
+→ `/` 에 `{"detail":"Not Found"}` 가 보이면 [render-fix-dashboard-not-found.md](../docs/06-guide/render-fix-dashboard-not-found.md) 참고.
+
+| 확인 URL | |
+|----------|--|
+| API 헬스 | https://iot-fl68.onrender.com/health |
+| Render 설정 | https://dashboard.render.com/web/srv-d88dg2rbc2fs73eqisgg |
 
 ## Deploy 실패 수정 (`Could not import module "main"`)
 
@@ -38,15 +46,13 @@ uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
 
 ## Supabase Auth redirect
 
-Supabase → **Authentication** → **URL configuration** → Redirect URLs:
+**대시보드(Next.js) 서비스 URL**에만 넣습니다 (API URL `iot-fl68` 아님):
 
 ```
-https://iot-fl68.onrender.com/auth/callback
+https://<your-iot-dashboard>.onrender.com/auth/callback
 ```
 
-Site URL (선택): `https://iot-fl68.onrender.com`
-
-## iot-dashboard 환경 변수 (이 서비스에 설정)
+## iot-dashboard 환경 변수 (**web** 서비스에 설정 — iot-fl68 아님)
 
 필수:
 
@@ -61,14 +67,16 @@ OPENAI_API_KEY=<OpenAI>
 Blueprint 연동 시 자동:
 
 ```
-ORCHESTRATOR_URL=<iot-orchestrator 호스트>
-ORCHESTRATOR_TOKEN=<BACKEND_API_TOKEN과 동일>
+ORCHESTRATOR_URL=https://iot-fl68.onrender.com
+ORCHESTRATOR_TOKEN=<iot-fl68 BACKEND_API_TOKEN 과 동일>
 ```
 
-## iot-orchestrator (별도 서비스가 있을 때)
+## iot-fl68 (현재 API 서비스) 환경 변수
 
 ```
-CORS_ORIGINS=https://iot-fl68.onrender.com
+CORS_ORIGINS=https://<your-iot-dashboard>.onrender.com
+DASHBOARD_PUBLIC_URL=https://<your-iot-dashboard>.onrender.com
+BACKEND_API_TOKEN=<생성된 토큰>
 ```
 
 오케스트레이터 URL이 다르면 `ORCHESTRATOR_URL`을 그 주소로 맞춥니다.

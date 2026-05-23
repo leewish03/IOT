@@ -42,6 +42,19 @@ else:
         if authorization != expected:
             raise HTTPException(status_code=401, detail="Invalid backend token")
 
+    @app.get("/")
+    def root() -> dict[str, Any]:
+        dashboard = os.getenv("DASHBOARD_PUBLIC_URL", "").strip()
+        return {
+            "service": "iot-orchestrator",
+            "message": "This URL is the API server, not the browser dashboard.",
+            "health": "/health",
+            "tools": "/tools",
+            "scene": {"latest": "/scene/latest", "analyze": "POST /scene/analyze", "ws": "/ws/scene"},
+            "dashboard_url": dashboard or None,
+            "hint_ko": "브라우저 UI는 Next.js(iot-dashboard) 서비스 URL을 여세요. Render에서 web/ 루트로 별도 Web Service를 만드세요.",
+        }
+
     @app.get("/health")
     def health() -> dict[str, str]:
         return {"status": "ok", "env": settings.env}
